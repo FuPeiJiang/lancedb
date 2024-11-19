@@ -25,7 +25,7 @@ jobs:
             crt=$(realpath $(dirname $(rustup which rustc))/../lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained)
             sysroot_lib=/usr/aarch64-unknown-linux-musl/usr/lib
             apk_url=https://dl-cdn.alpinelinux.org/alpine/latest-stable/main/aarch64/
-            curl -sSf $apk_url>apk_list
+            curl -sSf $apk_url > apk_list
             gcc_apk=$(cat apk_list | grep -oP '(?<=")gcc-\d.*?(?=")')
             libgcc_apk=$(cat apk_list | grep -oP '(?<=")libgcc-\d.*?(?=")')
             musl_apk=$(cat apk_list | grep -oP '(?<=")musl-\d.*?(?=")')
@@ -33,15 +33,19 @@ jobs:
             curl -sSf $apk_url$libgcc_apk | tar zxf -
             curl -sSf $apk_url$musl_apk | tar zxf -
             mkdir -p $sysroot_lib
-            echo 'GROUP ( libgcc_s.so.1 -lgcc )'>$sysroot_lib/libgcc_s.so
+            echo 'GROUP ( libgcc_s.so.1 -lgcc )' > $sysroot_lib/libgcc_s.so
             cp usr/lib/libgcc_s.so.1 $sysroot_lib
             cp usr/lib/gcc/aarch64-alpine-linux-musl/*/libgcc.a $sysroot_lib
             cp lib/ld-musl-aarch64.so.1 $sysroot_lib/libc.so
+            echo '!<arch>' > $sysroot_lib/libdl.a
             cp $crt/crti.o $sysroot_lib
             cp $crt/crtbeginS.o $sysroot_lib
             cp $crt/crtendS.o $sysroot_lib
             cp $crt/crtn.o $sysroot_lib
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+            CARGO_BUILD_TARGET=aarch64-unknown-linux-musl CC=clang RUSTFLAGS='-Ctarget-feature=-crt-static -Clinker=clang -Clink-arg=-fuse-ld=mold -Clink-arg=--target=aarch64-unknown-linux-musl -Clink-arg=--sysroot=/usr/aarch64-unknown-linux-musl -Clink-arg=-lc' bash ci/manylinux_node/build_vectordb.sh aarch64
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          limit-access-to-actor: true
+          name: node-native-linux-${{ matrix.config.arch }}
+          path: |
+            node/dist/lancedb-vectordb-linux*.tgz
