@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Install Dependencies and Build
         run: |
-            apk add protobuf-dev curl clang mold grep npm
+            apk add protobuf-dev curl clang mold grep npm bash
             curl --proto '=https' --tlsv1.3 -sSf https://raw.githubusercontent.com/rust-lang/rustup/refs/heads/master/rustup-init.sh | sh -s -- -y --default-toolchain 1.80.0
             source "$HOME/.cargo/env"
             rustup target add aarch64-unknown-linux-musl --toolchain 1.80.0
