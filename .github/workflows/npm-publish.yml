@@ -11,7 +11,7 @@ jobs:
       matrix:
         config:
           - arch: x86_64
-            runner: ubuntu-2404-4x-arm64
+            runner: ubuntu-test
             container: alpine:edge
     steps:
       - name: Checkout
