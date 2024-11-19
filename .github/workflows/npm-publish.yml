@@ -41,7 +41,7 @@ jobs:
             cp $crt/crtbeginS.o $sysroot_lib
             cp $crt/crtendS.o $sysroot_lib
             cp $crt/crtn.o $sysroot_lib
-            CARGO_BUILD_TARGET=aarch64-unknown-linux-musl CC=clang RUSTFLAGS=$"-Ctarget-feature=-crt-static -Clinker=clang -Clink-arg=-fuse-ld=mold -Clink-arg=--target=aarch64-unknown-linux-musl -Clink-arg=--sysroot=/usr/aarch64-unknown-linux-musl -Clink-arg=-lc" bash ci/manylinux_node/build_vectordb.sh aarch64
+            CARGO_BUILD_TARGET=aarch64-unknown-linux-musl CC=clang RUSTFLAGS='-Ctarget-feature=-crt-static -Clinker=clang -Clink-arg=-fuse-ld=mold -Clink-arg=--target=aarch64-unknown-linux-musl -Clink-arg=--sysroot=/usr/aarch64-unknown-linux-musl -Clink-arg=-lc' bash ci/manylinux_node/build_vectordb.sh aarch64
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
         with:
