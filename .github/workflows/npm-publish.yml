@@ -16,6 +16,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: |
+            apk add protobuf-dev curl clang mold
+            curl --proto '=https' --tlsv1.3 -sSf https://raw.githubusercontent.com/rust-lang/rustup/refs/heads/master/rustup-init.sh | sh -s -- -y --default-toolchain 1.80.0
+            source "$HOME/.cargo/env"
+            rustup target add aarch64-unknown-linux-musl --toolchain 1.80.0
+            crt=$(realpath $(dirname $(rustup which rustc))/../lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained)
+            sysroot=/usr/aarch64-unknown-linux-musl
+            mkdir $sysroot
+            cp $crt/crti.o $sysroot
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         with:
