@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Install dependencies
         run: |
-          apk add protobuf-dev curl clang lld llvm19 grep npm msitools sed
+          apk add protobuf-dev curl clang lld llvm19 grep npm bash msitools sed
           curl --proto '=https' --tlsv1.3 -sSf https://raw.githubusercontent.com/rust-lang/rustup/refs/heads/master/rustup-init.sh | sh -s -- -y --default-toolchain 1.80.0
           echo "source $HOME/.cargo/env" >> saved_env
           echo "export CC=clang" >> saved_env
