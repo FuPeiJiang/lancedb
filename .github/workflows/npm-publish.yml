@@ -32,3 +32,9 @@ jobs:
         run: |
           source ./saved_env
           bash ci/manylinux_node/build_vectordb.sh ${{ matrix.config.arch }}
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-native-windows
+          path: |
+            node/dist/lancedb-vectordb-win32*.tgz
