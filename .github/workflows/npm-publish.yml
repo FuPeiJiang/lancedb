@@ -4,14 +4,14 @@ on: [push]
 jobs:
 
   node-windows:
-    name: vectordb x86_64-pc-windows-msvc
+    name: vectordb aarch64-pc-windows-msvc
     runs-on: ubuntu-latest
     container: alpine:edge
     strategy:
       fail-fast: false
       matrix:
         config:
-          - arch: x86_64
+          - arch: aarch64
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,12 +22,12 @@ jobs:
           echo "source $HOME/.cargo/env" >> saved_env
           echo "export CC=clang" >> saved_env
           source "$HOME/.cargo/env"
-          rustup target add x86_64-pc-windows-msvc --toolchain 1.80.0
-          (mkdir -p sysroot && cd sysroot && sh ../ci/sysroot-x86_64-pc-windows-msvc.sh)
+          rustup target add aarch64-pc-windows-msvc --toolchain 1.80.0
+          (mkdir -p sysroot && cd sysroot && sh ../ci/sysroot-aarch64-pc-windows-msvc.sh)
           echo "export AR=llvm-ar" >> saved_env
-          echo "export C_INCLUDE_PATH=/usr/x86_64-pc-windows-msvc/usr/include" >> saved_env
-          echo "export CARGO_BUILD_TARGET=x86_64-pc-windows-msvc" >> saved_env
-          echo "export RUSTFLAGS='-Ctarget-cpu=haswell -Ctarget-feature=+crt-static,+avx2,+fma,+f16c -Clinker=lld -Clink-arg=/LIBPATH:/usr/x86_64-pc-windows-msvc/usr/lib'" >> saved_env
+          echo "export C_INCLUDE_PATH=/usr/aarch64-pc-windows-msvc/usr/include" >> saved_env
+          echo "export CARGO_BUILD_TARGET=aarch64-pc-windows-msvc" >> saved_env
+          echo "export RUSTFLAGS='-Ctarget-feature=+crt-static,+neon,+fp16,+fhm,+dotprod -Clinker=lld -Clink-arg=/LIBPATH:/usr/aarch64-pc-windows-msvc/usr/lib -Clink-arg=arm64rt.lib'" >> saved_env
       - name: Build Linux Artifacts
         run: |
           source ./saved_env
