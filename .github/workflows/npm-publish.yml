@@ -87,7 +87,6 @@ jobs:
           source ./saved_env
           bash ci/manylinux_node/build_lancedb.sh ${{ matrix.config.arch }}
       - name: Upload Windows Artifacts
-        if: ${{ matrix.config.arch == 'lancedb' }}
         uses: actions/upload-artifact@v4
         with:
           name: nodejs-native-windows-${{ matrix.config.arch }}
