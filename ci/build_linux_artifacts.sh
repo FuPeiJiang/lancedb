@@ -3,7 +3,7 @@ set -e
 ARCH=${1:-x86_64}
 TARGET_TRIPLE=${2:-x86_64-unknown-linux-gnu}
 
-# We pass down the current user so that when we later mount the local files 
+# We pass down the current user so that when we later mount the local files
 # into the container, the files are accessible by the current user.
 pushd ci/manylinux_node
 docker build \

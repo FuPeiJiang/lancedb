@@ -8,7 +8,7 @@ import inspect
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 from functools import cached_property
 from typing import (
     TYPE_CHECKING,
@@ -1011,6 +1011,39 @@ class Table(ABC):
         columns : Iterable[str]
             The names of the columns to drop.
         """
+
+    @abstractmethod
+    def checkout(self):
+        """
+        Checks out a specific version of the Table
+
+        Any read operation on the table will now access the data at the checked out
+        version. As a consequence, calling this method will disable any read consistency
+        interval that was previously set.
+
+        This is a read-only operation that turns the table into a sort of "view"
+        or "detached head".  Other table instances will not be affected.  To make the
+        change permanent you can use the `[Self::restore]` method.
+
+        Any operation that modifies the table will fail while the table is in a checked
+        out state.
+
+        To return the table to a normal state use `[Self::checkout_latest]`
+        """
+
+    @abstractmethod
+    def checkout_latest(self):
+        """
+        Ensures the table is pointing at the latest version
+
+        This can be used to manually update a table when the read_consistency_interval
+        is None
+        It can also be used to undo a `[Self::checkout]` operation
+        """
+
+    @abstractmethod
+    def list_versions(self):
+        """List all versions of the table"""
 
     @cached_property
     def _dataset_uri(self) -> str:
@@ -2901,6 +2934,19 @@ class AsyncTable:
         version.
         """
         return await self._inner.version()
+
+    async def list_versions(self):
+        """
+        List all versions of the table
+        """
+        versions = await self._inner.list_versions()
+        for v in versions:
+            ts_nanos = v["timestamp"]
+            v["timestamp"] = datetime.fromtimestamp(ts_nanos // 1e9) + timedelta(
+                microseconds=(ts_nanos % 1e9) // 1e3
+            )
+
+        return versions
 
     async def checkout(self, version):
         """

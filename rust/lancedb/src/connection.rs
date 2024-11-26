@@ -133,7 +133,7 @@ impl IntoArrow for NoData {
 
 /// A builder for configuring a [`Connection::create_table`] operation
 pub struct CreateTableBuilder<const HAS_DATA: bool, T: IntoArrow> {
-    parent: Arc<dyn ConnectionInternal>,
+    pub(crate) parent: Arc<dyn ConnectionInternal>,
     pub(crate) name: String,
     pub(crate) data: Option<T>,
     pub(crate) mode: CreateTableMode,
@@ -341,7 +341,7 @@ pub struct OpenTableBuilder {
 }
 
 impl OpenTableBuilder {
-    fn new(parent: Arc<dyn ConnectionInternal>, name: String) -> Self {
+    pub(crate) fn new(parent: Arc<dyn ConnectionInternal>, name: String) -> Self {
         Self {
             parent,
             name,
@@ -1169,6 +1169,7 @@ mod tests {
     use lance_testing::datagen::{BatchGenerator, IncrementingInt32};
     use tempfile::tempdir;
 
+    use crate::query::QueryBase;
     use crate::query::{ExecutableQuery, QueryExecutionOptions};
 
     use super::*;
@@ -1296,6 +1297,7 @@ mod tests {
         // In v1 the row group size will trump max_batch_length
         let batches = tbl
             .query()
+            .limit(20000)
             .execute_with_options(QueryExecutionOptions {
                 max_batch_length: 50000,
                 ..Default::default()
