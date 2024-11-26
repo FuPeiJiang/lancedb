@@ -3,14 +3,16 @@ on: [push]
 
 jobs:
 
-  node-windows:
-    name: vectordb ${{ matrix.config.arch }}-pc-windows-msvc
+  node-nodejs-windows:
+    name: ${{ matrix.config.package }} ${{ matrix.config.arch }}-pc-windows-msvc
     runs-on: ubuntu-latest
     container: alpine:edge
     strategy:
       fail-fast: false
       matrix:
         config:
+          - package: vectordb
+          - package: lancedb
           - arch: x86_64
           - arch: aarch64
     steps:
@@ -28,6 +30,8 @@ jobs:
           (mkdir -p sysroot && cd sysroot && sh ../ci/sysroot-${{ matrix.config.arch }}-pc-windows-msvc.sh)
           echo "export C_INCLUDE_PATH=/usr/${{ matrix.config.arch }}-pc-windows-msvc/usr/include" >> saved_env
           echo "export CARGO_BUILD_TARGET=${{ matrix.config.arch }}-pc-windows-msvc" >> saved_env
+          printf '#!/bin/sh\ncargo "$@"' > $HOME/.cargo/bin/cargo-xwin
+          chmod u+x $HOME/.cargo/bin/cargo-xwin
       - name: Configure x86_64 build
         if: ${{ matrix.config.arch == 'x86_64' }}
         run: |
@@ -39,10 +43,18 @@ jobs:
       - name: Build Windows Artifacts
         run: |
           source ./saved_env
-          bash ci/manylinux_node/build_vectordb.sh ${{ matrix.config.arch }} ${{ matrix.config.arch }}-pc-windows-msvc
-      - name: Upload Windows Artifacts
+          bash ci/manylinux_node/build_${{ matrix.config.package }}.sh ${{ matrix.config.arch }} ${{ matrix.config.arch }}-pc-windows-msvc
+      - name: Upload Windows Artifacts (vectordb)
+        if: ${{ matrix.config.arch == 'vectordb' }}
         uses: actions/upload-artifact@v4
         with:
           name: node-native-windows-${{ matrix.config.arch }}
           path: |
             node/dist/lancedb-vectordb-win32*.tgz
+      - name: Upload Windows Artifacts (lancedb)
+        if: ${{ matrix.config.arch == 'lancedb' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: nodejs-native-windows-${{ matrix.config.arch }}
+          path: |
+            nodejs/dist/*.node
